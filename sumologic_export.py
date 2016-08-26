@@ -38,7 +38,7 @@ CONFIG_FILE = expanduser('~/.sumo')
 
 
 # Pretty print datetime objects.
-prettify = lambda x: x.strftime('%Y-%m-%d')
+prettify = lambda x: x.strftime('%Y-%m-%d-%H-%M')
 
 def read_creds():
     with open(CONFIG_FILE, 'rb') as cfg:
@@ -187,7 +187,7 @@ class Exporter(object):
     """Abstraction for exporting Sumologic logs."""
 
     # Default time increment to move forward by.
-    INCREMENT = timedelta(days=1)
+    INCREMENT = timedelta(hours=1)
 
     # Default timerange to use if no dates are specified.
     DEFAULT_TIMERANGE = timedelta(days=30)
@@ -228,7 +228,7 @@ class Exporter(object):
         """
         if start:
             try:
-                self.start = datetime.strptime(start, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+                self.start = datetime.strptime(start, '%Y-%m-%d-%H')
             except:
                 print 'Invalid date format. Format must be YYYY-MM-DD.'
                 raise SystemExit(1)
@@ -237,11 +237,11 @@ class Exporter(object):
                 print 'Start date must be in the past!'
                 raise SystemExit(1)
         else:
-            self.start = (datetime.now() - self.DEFAULT_TIMERANGE).replace(hour=0, minute=0, second=0, microsecond=0)
+            self.start = (datetime.now() - self.DEFAULT_TIMERANGE)
 
         if stop:
             try:
-                self.stop = datetime.strptime(stop, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+                self.stop = datetime.strptime(stop, '%Y-%m-%d-%H')
             except:
                 print 'Invalid date format. Format must be YYYY-MM-DD.'
                 raise SystemExit(1)
@@ -250,7 +250,7 @@ class Exporter(object):
                 print 'Stop date must be in the past!'
                 raise SystemExit(1)
         else:
-            self.stop = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            self.stop = datetime.now()
 
     def export(self, start, stop):
         """
@@ -289,7 +289,7 @@ class Exporter(object):
             # If there are logs to be downloaded, let's do it.
             if total_logs:
                 print ' - Downloading %d logs.' % total_logs
-                write_to_file(prettify(date),self.client.get_logs(job_url, total_logs))
+                write_to_file("exports/%s.json.gz" % prettify(date),self.client.get_logs(job_url, total_logs))
             else:
                 print ' - No logs found.'
 
