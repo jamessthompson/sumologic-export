@@ -1,3 +1,7 @@
 exports
 dist
 *.egg-info
+.idea
+*.json.gz
+*.pyc
+.sumocookie

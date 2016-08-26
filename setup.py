@@ -7,9 +7,9 @@ from setuptools import setup
 setup(
 
     # Basic package information:
-    name = 'sumologic-export',
+    name = 'sumologic_export',
     version = '0.0.2',
-    scripts = ['sumologic-export'],
+    scripts = ['sumologic_export.py'],
 
     # Packaging options:
     zip_safe = False,
