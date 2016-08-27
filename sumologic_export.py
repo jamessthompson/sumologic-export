@@ -55,14 +55,14 @@ class SumologicClient(object):
     }
 
     # Amount of time to wait for API response.
-    TIMEOUT = 10
+    TIMEOUT = 30
 
     # Sumologic timezone to specify.
     TIMEZONE = 'PST'
 
     # The amount of logs to download from Sumologic per page.  The higher this
     # is, the more memory is used, but the faster the exports are.
-    MESSAGES_PER_PAGE = 10000
+    MESSAGES_PER_PAGE = 6000
 
     def __init__(self, email=None, password=None):
         if email is None or password is None:
@@ -119,6 +119,10 @@ class SumologicClient(object):
                     json = resp.json()
                     if json['state'] == 'DONE GATHERING RESULTS':
                         return json['messageCount']
+                    if json['state'] == 'GATHERING RESULTS':
+                        print 'Gathering results. Messages: %s' % json['messageCount']
+                        sleep(1)
+                        continue
                 raise Exception("Unexpected response: %s" % resp.text)
             except Exception as ex:
                 print ex
@@ -149,12 +153,12 @@ class SumologicClient(object):
                         json = resp.json()
                         for log in json['messages']:
                             yield log['map']
-
+                        print 'Finished processing page: %s/%s' % (page+1, (count / self.MESSAGES_PER_PAGE)+1)
                         break
                     raise Exception("Unexpected response: %s" % (resp.text))
                 except Exception as ex:
                     print ex
-                    sleep(1)
+                    sleep(0.2)
 
     def get(self, url, params=None):
         return self._resp(self.session.get(
@@ -303,7 +307,7 @@ def write_to_file(file_name, logs):
     with gzip.open(file_name, mode='wb') as f:
         for log in logs:
             f.write(dumps(log) + '\n')
-
+        f.close()
 
 def configure():
     """
